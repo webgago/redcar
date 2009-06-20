@@ -4,7 +4,7 @@ module Redcar
     key "Ctrl+Page_Up"
     
     def execute
-      tab.pane.gtk_notebook.prev_page
+      tab.pane.notebook.prev_page
     end
   end
 end

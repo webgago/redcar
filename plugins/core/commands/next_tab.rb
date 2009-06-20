@@ -4,7 +4,7 @@ module Redcar
     key "Ctrl+Page_Down"
     
     def execute
-      tab.pane.gtk_notebook.next_page
+      tab.pane.notebook.next_page
     end
   end
 end

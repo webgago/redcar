@@ -16,7 +16,7 @@ module Redcar
       # App.close_all_windows(false)
     end
 
-    attr_reader(:notebooks_panes, :previous_tab, :gtk_menubar,
+    attr_reader(:widgets_panes, :previous_tab, :gtk_menubar,
                 :focussed_gtk_widget)
 
     # Do not call this directly, use App#new_window instead.
@@ -24,7 +24,7 @@ module Redcar
     def initialize
       title = "Redcar"
       super(title)
-      @notebooks_panes = {}
+      @widgets_panes = {}
       @focussed_tab = nil
       @focussed_gtk_widget = nil
       build_widgets
@@ -101,7 +101,7 @@ module Redcar
 
     def close_tab(tab) #:nodoc:
       if tab.pane
-        nb = tab.pane.gtk_notebook
+        nb = tab.pane.notebook
         unless nb.destroyed?
           nb.remove_page(nb.page_num(tab.gtk_nb_widget))
           Tab.widget_to_tab.delete tab.gtk_nb_widget
@@ -124,16 +124,16 @@ module Redcar
     end
 
     def unify(pane) #:nodoc:
-      panes_container = pane.gtk_notebook.parent
+      panes_container = pane.widget.parent
       unless panes_container.class == Gtk::HBox
-        other_side = panes_container.children.find {|c| c != pane.gtk_notebook }
-        panes_container.remove(pane.gtk_notebook)
+        other_side = panes_container.children.find {|c| c != pane.widget }
+        panes_container.remove(pane.widget)
         panes_container.remove(other_side)
         if [Gtk::HPaned, Gtk::VPaned].include? other_side.class
           other_tabs = collect_tabs_from_dual(other_side)
         else
-          other_tabs = @notebooks_panes[other_side].tabs
-          @notebooks_panes.delete other_side
+          other_tabs = @widgets_panes[other_side].tabs
+          @widgets_panes.delete other_side
         end
         container_of_container = panes_container.parent
         other_panes = other_tabs.map {|t| t.pane }.uniq
@@ -142,14 +142,14 @@ module Redcar
         end
         if container_of_container.class == Gtk::HBox
           container_of_container.remove panes_container
-          container_of_container.pack_start pane.gtk_notebook
+          container_of_container.pack_start pane.widget
         else
           if container_of_container.child1 == panes_container
             container_of_container.remove panes_container
-            container_of_container.add1 pane.gtk_notebook
+            container_of_container.add1 pane.widget
           else
             container_of_container.remove panes_container
-            container_of_container.add2 pane.gtk_notebook
+            container_of_container.add2 pane.widget
           end
         end
       end
@@ -208,7 +208,7 @@ module Redcar
     
     def traverse_panes_inner(gtk_widget, &block)
       if gtk_widget.is_a?(Gtk::Notebook)
-        yield @notebooks_panes[gtk_widget]
+        yield @widgets_panes[gtk_widget]
       else
         gtk_widget.children.each do |child|
           traverse_panes_inner(child, &block)
@@ -227,7 +227,7 @@ module Redcar
     def collect_tabs_from_dual(dual)
       [dual.child1, dual.child2].map do |child|
         if child.class == Gtk::Notebook
-          @notebooks_panes[child].tabs
+          @widgets_panes[child].tabs
         else
           collect_tabs_from_dual(child)
         end
@@ -241,24 +241,24 @@ module Redcar
       when :vertical
         dual = Gtk::HPaned.new
       end
-      new_pane = Pane.new self
-      @notebooks_panes[new_pane.gtk_notebook] = new_pane
-      panes_container = pane.gtk_notebook.parent
+      new_pane = NotebookPane.new self
+      @widgets_panes[new_pane.widget] = new_pane
+      panes_container = pane.widget.parent
       if panes_container.class == Gtk::HBox
-        panes_container.remove(pane.gtk_notebook)
-        dual.add(new_pane.gtk_notebook)
-        dual.add(pane.gtk_notebook)
+        panes_container.remove(pane.widget)
+        dual.add(new_pane.widget)
+        dual.add(pane.widget)
         panes_container.pack_start(dual)
       else
-        if panes_container.child1 == pane.gtk_notebook # (on the left or top)
-          panes_container.remove(pane.gtk_notebook)
-          dual.add(new_pane.gtk_notebook)
-          dual.add(pane.gtk_notebook)
+        if panes_container.child1 == pane.widget # (on the left or top)
+          panes_container.remove(pane.widget)
+          dual.add(new_pane.widget)
+          dual.add(pane.widget)
           panes_container.add1(dual)
         else
-          panes_container.remove(pane.gtk_notebook)
-          dual.add(new_pane.gtk_notebook)
-          dual.add(pane.gtk_notebook)
+          panes_container.remove(pane.widget)
+          dual.add(new_pane.widget)
+          dual.add(pane.widget)
           panes_container.add2(dual)
         end
       end
@@ -305,16 +305,16 @@ module Redcar
         @focussed_gtk_widget = gtk_widget
         until gtk_widget == nil or
             Tab.widget_to_tab.keys.include? gtk_widget or
-            @notebooks_panes.keys.include? gtk_widget
+            @widgets_panes.keys.include? gtk_widget
           gtk_widget = gtk_widget.parent
         end
         if gtk_widget
-          if Tab.widget_to_tab[gtk_widget]
-            update_focussed_tab(Tab.widget_to_tab[gtk_widget])
-          elsif @notebooks_panes.keys.include? gtk_widget
-            gtk_notebook = @notebooks_panes.keys.find{|nb| nb == gtk_widget}
-            pageid = gtk_notebook.page
-            gtk_nb_widget = gtk_notebook.get_nth_page(pageid)
+          if tab = Tab.widget_to_tab[gtk_widget]
+            update_focussed_tab(tab)
+          elsif @widgets_panes[gtk_widget].is_a?(NotebookPane) # TODO: fix hardcoded ref
+            notebook = gtk_widget
+            pageid = notebook.page
+            gtk_nb_widget = notebook.get_nth_page(pageid)
             update_focussed_tab(Tab.widget_to_tab[gtk_nb_widget])
           end
         end
@@ -379,9 +379,9 @@ module Redcar
                    0,      0)
       add(gtk_table)
 
-      pane = Redcar::Pane.new self
-      @notebooks_panes[pane.gtk_notebook] = pane
-      gtk_panes_box.add(pane.gtk_notebook)
+      pane = Redcar::NotebookPane.new self
+      @widgets_panes[pane.widget] = pane
+      gtk_panes_box.add(pane.widget)
 
       @initial_show_widgets =
         [
@@ -393,7 +393,7 @@ module Redcar
          #gtk_toolbar,
          gtk_edit_view,
          @gtk_menubar,
-         pane.gtk_notebook
+         pane.widget
         ]
     end
 

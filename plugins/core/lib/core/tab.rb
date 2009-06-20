@@ -156,14 +156,14 @@ module Redcar
     
     # Move the tab up one.
     def move_up
-      nb = @pane.gtk_notebook
+      nb = @pane.notebook
       new_ix = nb.page_num(@gtk_nb_widget)+1
       nb.reorder_child(@gtk_nb_widget, new_ix)
     end
     
     # Move the tab down one.
     def move_down
-      nb = @pane.gtk_notebook
+      nb = @pane.notebook
       new_ix = [nb.page_num(@gtk_nb_widget)-1, 0].max
       nb.reorder_child(@gtk_nb_widget, new_ix)
     end

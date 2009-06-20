@@ -1,31 +1,36 @@
 
 module Redcar
-  # A module that deals with the 'range's that commands can be in.
+  # Every Redcar::Command is valid inside one and only one 
+  # Redcar::Range. Ranges include instances of:
+  #
+  #    Redcar::Window
+  #    Redcar::Pane and subclasses
+  #    Redcar::Tab and subclasses
+  #    Redcar::EditView and subclasses
+  #    Redcar::Speedbar and subclasses
+  #
+  # Commands in a Range are activated when that Range is
+  # focussed, e.g. when the user clicks in an EditView or in
+  # the ProjectPane.
   module Range
     mattr_accessor :active
     
     def self.activate(range)
-      #      puts "activating range #{range}"
       @commands ||= { }
       if @active.include? range
-        #        puts "  already active"
         true
       else
-        #        puts "  not already active"
         @active << range
         activate_commands(@commands[range]||[])
       end
     end
     
     def self.deactivate(range)
-      #      puts "deactivating range #{range}"
       @commands ||= { }
       if @active.include? range
-        #        puts "  was active"
         @active.delete range
         deactivate_commands(@commands[range]||[])
       else
-        #        puts "  was not active"
         true
       end
     end
@@ -39,7 +44,6 @@ module Redcar
     end
     
     def self.register_command(range, command)
-      #       puts "registering command range: #{command}, #{range}"
       if valid?(range)
         @commands ||= { }
         @commands[range] ||= []
