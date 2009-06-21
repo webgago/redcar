@@ -6,18 +6,8 @@ module Redcar
   class Window < Gtk::Window
     include FreeBASE::DataBusHelper
 
-    def self.load #:nodoc:
-      Hook.register :new_tab
-      Hook.register :close_tab
-      Hook.register :focus_tab
-    end
-    
-    def self.stop #:nodoc:
-      # App.close_all_windows(false)
-    end
-
-    attr_reader(:widgets_panes, :previous_tab, :gtk_menubar,
-                :focussed_gtk_widget)
+    attr_reader :widgets_panes, :previous_tab, :gtk_menubar,
+                :focussed_gtk_widget
 
     # Do not call this directly, use App#new_window instead.
     # Creates a new Redcar window.

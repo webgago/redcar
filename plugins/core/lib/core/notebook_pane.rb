@@ -11,6 +11,12 @@ module Redcar
     # The label_position of the tabs in the Pane.
     attr_reader   :label_position
     
+    def self.load #:nodoc:
+      Hook.register :new_tab
+      Hook.register :close_tab
+      Hook.register :focus_tab
+    end
+    
     # Do not call this directly.
     def initialize(window)
       super(window)

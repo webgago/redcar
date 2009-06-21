@@ -30,7 +30,6 @@ module Redcar
   class CorePlugin < Redcar::Plugin
     def self.load(plugin) # :nodoc:
       App.load
-      Window.load
       Tooltip.load
       Menu.load
       Preference.load
@@ -39,6 +38,7 @@ module Redcar
       Command.load
       Keymap.load
       Bundle.load
+      NotebookPane.load
       Zerenity::Base.no_main_loop = true
       plugin.transition(FreeBASE::LOADED)
     end

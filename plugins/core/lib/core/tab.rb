@@ -24,8 +24,8 @@ module Redcar
     end
     
     # Declares that only one of this type of Tab can be opened
-    # at any given time per window. Trying to open one will simply 
-    # return the current instance instead.
+    # at any given time per window. Trying to open another will 
+    # simply return the current instance instead.
     def self.singleton
       @singleton = true
       self.class.send(:define_method, :instance) do
