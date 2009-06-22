@@ -33,12 +33,12 @@ module Redcar
       Tooltip.load
       Menu.load
       Preference.load
+      NotebookPane.load
       Tab.load
       Gui.load
       Command.load
       Keymap.load
       Bundle.load
-      NotebookPane.load
       Zerenity::Base.no_main_loop = true
       plugin.transition(FreeBASE::LOADED)
     end
@@ -61,7 +61,6 @@ module Redcar
       Menu.stop
       Tab.stop
       Command.stop
-      Window.stop
       plugin.transition(FreeBASE::LOADED)
     end
   end

@@ -6,8 +6,8 @@ module Redcar
     end
     
     def execute
-      if pt = ProjectTab.instance
-        pt.rename_path(@path)
+      if project_pane = ProjectPane.instance
+        project_pane.rename_path(@path)
       end
     end
   end

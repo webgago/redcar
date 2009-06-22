@@ -6,8 +6,8 @@ module Redcar
     end
   
     def execute
-      if pt = ProjectTab.instance
-        pt.remove_project(@path)
+      if project_pane = ProjectPane.instance
+        project_pane.remove_project(@path)
      end
     end
   end

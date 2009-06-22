@@ -19,18 +19,18 @@ module Redcar
     
     # Do not call this directly.
     def initialize(window)
-      super(window)
+      super(window)#, :chrome => false)
       make_notebook
       connect_notebook_signals
       show_notebook
     end
     
     # Returns the Gtk::Notebook
-    def widget
+    def gtk_widget
       @gtk_notebook
     end
     
-    alias_method :notebook, :widget
+    alias_method :notebook, :gtk_widget
     
     # Creates a new Tab in the Pane. tab_type should be
     # Redcar::Tab or child class. args are passed
@@ -107,7 +107,7 @@ module Redcar
     end
     
     def show_notebook
-      @gtk_notebook.show
+      @gtk_notebook.show_all
     end
     
     def remove_tab(tab)

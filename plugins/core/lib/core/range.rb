@@ -60,6 +60,7 @@ module Redcar
       range.is_a? Class and
       (range == Redcar::Window or
       range <= Redcar::Tab or
+      range <= Redcar::Pane or 
       range_ancestors.include? "Redcar::EditView" or
       range_ancestors.include? "Redcar::Speedbar")
     end

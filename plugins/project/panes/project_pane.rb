@@ -1,17 +1,18 @@
 
 module Redcar
-  class ProjectTab < Tab
-    singleton
-    
+  class ProjectPane < Pane
     TITLE = "Project"
     attr_accessor :store, :view, :directories
 
-    def initialize(pane)
+    class << self
+      attr_accessor :instance
+    end
+
+    def initialize(window)
       @store = Gtk::TreeStore.new(Gdk::Pixbuf, String, String, String)
       @view = Gtk::TreeView.new(@store)
       renderer1 = Gtk::CellRendererPixbuf.new
       @renderer2 = Gtk::CellRendererText.new
-#      @renderer2.editable = true
       @col1 = Gtk::TreeViewColumn.new
       @col1.title = "Icon"
       @col1.pack_start renderer1, false
@@ -24,22 +25,24 @@ module Redcar
       @view.show
       
       @directories ||= []
-      
-      super(pane, @view, :scrolled? => true, :toolbar? => true)
+      @gtk_sw = Gtk::ScrolledWindow.new
+      @gtk_sw.add(@view)
+      super(window)
 
       @gtk_sw.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
-      self.title = TITLE
-      @slot = bus('/redcar/project')
+      # self.title = TITLE
       icons_dir = Redcar.PLUGINS_PATH + '/project/icons/'
       @file_pic = Gdk::Pixbuf.new(icons_dir+"text-x-generic.png")
       @dir_pic = Gdk::Pixbuf.new(icons_dir+"folder.png")
       @image_pic = Gdk::Pixbuf.new(icons_dir+"gnome-mime-image.png")
       @ruby_pic = Gdk::Pixbuf.new(icons_dir+"ruby.png")
       connect_signals
+      ProjectPane.instance = self
+      @gtk_sw.show_all
     end
     
-    def close
-      super
+    def gtk_widget
+      @gtk_sw
     end
     
     def connect_signals
@@ -90,7 +93,7 @@ module Redcar
         ]
       end
       
-      ProjectTab.show_popup_menu(button_event, menu_def)
+      ProjectPane.show_popup_menu(button_event, menu_def)
     end
     
     # expects an array like:
@@ -113,7 +116,6 @@ module Redcar
     end
 
     def open_row(tree_path)
-#      puts "open_row(#{tree_path})"
       iter = @store.get_iter(tree_path)
       if File.directory? iter[2]
         dir_tree_get(iter[2], iter)
@@ -121,9 +123,7 @@ module Redcar
         @view.expand_row(iter.path, false)
         @ignore_row_expanded = false
       else
-        # TODO: make this use arrangements once they're working again
-        pane = Redcar.win.panes.find {|pn| !pn.tabs.map(&:title).include?(TITLE)}
-        OpenTabCommand.new(iter[2], pane).do
+        OpenTabCommand.new(iter[2], Redcar.win.panes(NotebookPane).first).do
       end
     end
     

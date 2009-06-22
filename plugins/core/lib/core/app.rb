@@ -93,7 +93,7 @@ module Redcar
       is_win = !windows.empty?
       if window
         Hook.trigger :close_window do
-          window.panes.each {|pane| pane.tabs.each {|tab| tab.close} }
+          window.panes(NotebookPane).each {|pane| pane.tabs.each {|tab| tab.close} }
           @window = nil if window == @window
         end
       end

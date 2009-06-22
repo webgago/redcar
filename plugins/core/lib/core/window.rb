@@ -30,10 +30,13 @@ module Redcar
     end
 
     # Returns an array of all the Panes in the Window in a well-defined
-    # order.
-    def panes
+    # order. Panes may be filtered to only include instances of subclasses
+    # of klass. e.g.
+    #
+    #    win.panes(NotebookPane)
+    def panes(klass=nil)
       result = []
-      traverse_panes {|pane| result << pane}
+      traverse_panes {|pane| result << pane if !klass or pane.class <= klass}
       result
     end
 
@@ -52,7 +55,7 @@ module Redcar
 
     # Returns an array of all tabs in the Window.
     def tabs
-      panes.map {|pane| pane.tabs }.flatten
+      panes(NotebookPane).map {|pane| pane.tabs }.flatten
     end
 
     # Returns an array of all open tabs that are instances of klass.
@@ -69,7 +72,7 @@ module Redcar
     # Returns an array of all active tabs (all tabs at the
     # forefront of their Panes).
     def active_tabs
-      panes.map {|p| p.active_tab}.compact
+      panes(NotebookPane).map {|p| p.active_tab}.compact
     end
 
     # Returns the currently focussed Tab in the Window.
@@ -81,12 +84,12 @@ module Redcar
       end
     end
 
-    def split_horizontal(pane) #:nodoc:
-      split_pane(:horizontal, pane)
+    def split_horizontal(pane, opts={}) #:nodoc:
+      split_pane(:horizontal, pane, opts)
     end
 
-    def split_vertical(pane) #:nodoc:
-      split_pane(:vertical, pane)
+    def split_vertical(pane, opts={}) #:nodoc:
+      split_pane(:vertical, pane, opts)
     end
 
     def close_tab(tab) #:nodoc:
@@ -197,8 +200,8 @@ module Redcar
     end
     
     def traverse_panes_inner(gtk_widget, &block)
-      if gtk_widget.is_a?(Gtk::Notebook)
-        yield @widgets_panes[gtk_widget]
+      if pane = @widgets_panes[gtk_widget]
+        yield pane
       else
         gtk_widget.children.each do |child|
           traverse_panes_inner(child, &block)
@@ -207,7 +210,7 @@ module Redcar
     end
     
     def pane_for_tab_class(tab_class)
-      panes.reverse.sort_by do |pane|
+      panes(NotebookPane).reverse.sort_by do |pane|
         num_same_class = pane.tabs.select {|t| t.is_a? tab_class}.length
         num = pane.tabs.length
         num_same_class*100 - (num - num_same_class)
@@ -216,7 +219,8 @@ module Redcar
     
     def collect_tabs_from_dual(dual)
       [dual.child1, dual.child2].map do |child|
-        if child.class == Gtk::Notebook
+        if child.class == Gtk::Notebook or
+            child.child.class == Gtk::Notebook
           @widgets_panes[child].tabs
         else
           collect_tabs_from_dual(child)
@@ -224,14 +228,17 @@ module Redcar
       end.flatten
     end
 
-    def split_pane(whichway, pane)
+    def split_pane(whichway, pane, opts)
       case whichway
       when :horizontal
         dual = Gtk::VPaned.new
+        klass = opts[:top] || opts[:bottom] || NotebookPane
       when :vertical
         dual = Gtk::HPaned.new
+        klass = opts[:left] || opts[:right] || NotebookPane
       end
-      new_pane = NotebookPane.new self
+      new_pane = klass.new(self)
+      p [klass, new_pane, new_pane.widget]
       @widgets_panes[new_pane.widget] = new_pane
       panes_container = pane.widget.parent
       if panes_container.class == Gtk::HBox
@@ -254,6 +261,7 @@ module Redcar
       end
       dual.show
       dual.position = 250
+      new_pane
     end
 
     def notebook_to_pane(nb)
@@ -301,8 +309,8 @@ module Redcar
         if gtk_widget
           if tab = Tab.widget_to_tab[gtk_widget]
             update_focussed_tab(tab)
-          elsif @widgets_panes[gtk_widget].is_a?(NotebookPane) # TODO: fix hardcoded ref
-            notebook = gtk_widget
+          elsif pane = @widgets_panes[gtk_widget] and pane.is_a?(NotebookPane) # TODO: fix hardcoded ref
+            notebook = pane.notebook
             pageid = notebook.page
             gtk_nb_widget = notebook.get_nth_page(pageid)
             update_focussed_tab(Tab.widget_to_tab[gtk_nb_widget])

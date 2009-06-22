@@ -8,13 +8,13 @@ module Redcar
     end
     
     def execute
-      unless project_tab = ProjectTab.instance
-	      project_tab = win.new_tab(ProjectTab)
-	      project_tab.focus
+      unless project_pane = ProjectPane.instance
+	      project_pane = win.new_tab(ProjectPane)
+	      project_pane.focus
 			end
       @dirname ||= Redcar::Dialog.open_folder
       if @dirname
-        project_tab.add_directory(@dirname.split("/").last, @dirname)
+        project_pane.add_directory(@dirname.split("/").last, @dirname)
       end
     end
   end

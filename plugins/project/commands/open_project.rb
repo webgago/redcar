@@ -5,10 +5,9 @@ module Redcar
     key  "Ctrl+Shift+P"
     
     def execute
-      new_tab = win.new_tab(ProjectTab)
-      new_tab.focus
-#      Redcar.StatusBar.main = "Opened Project tab"
-      new_tab
+      unless ProjectPane.instance
+        win.panes.first.split_vertical(:left => ProjectPane)
+      end
     end
   end
 end

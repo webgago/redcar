@@ -5,9 +5,9 @@ module Redcar
       Sensitive.register(:open_project, 
                          [:open_window, :new_tab, :close_tab, 
                           :after_focus_tab]) do
-        Redcar.win and Redcar.win.tabs.map(&:class).include?(ProjectTab)
+        Redcar.win and Redcar.win.panes(ProjectPane).any?
       end
-      Kernel.load File.dirname(__FILE__) + "/tabs/project_tab.rb"
+      Kernel.load File.dirname(__FILE__) + "/panes/project_pane.rb"
       Kernel.load File.dirname(__FILE__) + "/commands/open_project.rb"
       Kernel.load File.dirname(__FILE__) + "/commands/find_file_command.rb"
       Kernel.load File.dirname(__FILE__) + "/commands/add_directory_to_project_command.rb"
@@ -32,9 +32,9 @@ module Redcar
       end
       if directories.any?
         Redcar::SplitVertical.new.do
-        tab = Redcar::OpenProject.new.do
+        Redcar::OpenProject.new.do
         directories.each do |dir|
-          tab.add_directory(dir.split("/").last, dir)
+          ProjectPane.instance.add_directory(dir.split("/").last, dir)
         end
       end
       if files.any?
