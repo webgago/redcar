@@ -31,7 +31,6 @@ module Redcar
         end
       end
       if directories.any?
-        Redcar::SplitVertical.new.do
         Redcar::OpenProject.new.do
         directories.each do |dir|
           ProjectPane.instance.add_directory(dir.split("/").last, dir)

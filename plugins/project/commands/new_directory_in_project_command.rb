@@ -6,7 +6,7 @@ module Redcar
     end
     
     def execute
-      if pt = ProjectTab.instance
+      if pt = ProjectPane.instance
         pt.new_dir_at(@path)
       end
     end

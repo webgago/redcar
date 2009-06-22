@@ -238,7 +238,6 @@ module Redcar
         klass = opts[:left] || opts[:right] || NotebookPane
       end
       new_pane = klass.new(self)
-      p [klass, new_pane, new_pane.widget]
       @widgets_panes[new_pane.widget] = new_pane
       panes_container = pane.widget.parent
       if panes_container.class == Gtk::HBox

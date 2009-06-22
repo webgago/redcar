@@ -12,8 +12,8 @@ Feature: Multiple panes
       """
       Gtk::HBox
         Gtk::VPaned
-          Gtk::Notebook
-          Gtk::Notebook
+          Redcar::NotebookPane
+          Redcar::NotebookPane
       """
 
   Scenario: Split Vertical
@@ -22,8 +22,8 @@ Feature: Multiple panes
       """
       Gtk::HBox
         Gtk::HPaned
-          Gtk::Notebook
-          Gtk::Notebook
+          Redcar::NotebookPane
+          Redcar::NotebookPane
       """
 
   Scenario: Split Horizontal then Vertical
@@ -34,9 +34,9 @@ Feature: Multiple panes
       Gtk::HBox
         Gtk::VPaned
           Gtk::HPaned
-            Gtk::Notebook
-            Gtk::Notebook
-          Gtk::Notebook
+            Redcar::NotebookPane
+            Redcar::NotebookPane
+          Redcar::NotebookPane
       """
 
   Scenario: Split Horizontal then Unify
