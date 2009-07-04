@@ -57,5 +57,11 @@ module Redcar
       @_widget.show_all
       @_widget
     end
+    
+    # Useful in testing. Subclasses should override with something 
+    # more meaningful.
+    def visible_contents_as_string
+      gtk_widget.inspect
+    end
   end
 end

@@ -11,16 +11,31 @@ def only_tab(tab_type, title=nil)
   only(tabs)
 end
 
-Then /^I should see #{FeaturesHelper::STRING_RE} in the (\w+)(?: "([^"]+)")?$/ do |text, tab_type, title| # "
-  text = parse_string(text)
-  tab = only_tab(tab_type, title)
-  tab.visible_contents_as_string.should include(escape_text(text))
+def only_pane(pane_type)
+  panes = Redcar.win.panes(Redcar.const_get(pane_type))
+  only(panes)
 end
 
-Then /^I should not see #{FeaturesHelper::STRING_RE} in the (\w+)(?: "([^"]+)")?$/ do |text, tab_type, title| # "
+def only_area(area_type, title=nil)
+  if area_type =~ /Tab$/
+    area = only_tab(area_type, title)
+  elsif area_type =~ /Pane$/
+    area = only_pane(area_type)
+  end
+end
+
+Then /^I should see #{FeaturesHelper::STRING_RE} in the (\w+)(?: "([^"]+)")?$/ do |text, area_type, title| # "
+  text = parse_string(text)
+  area = only_area(area_type)
+  # p area
+  # p area.visible_contents_as_string
+  area.visible_contents_as_string.should include(escape_text(text))
+end
+
+Then /^I should not see #{FeaturesHelper::STRING_RE} in the (\w+)(?: "([^"]+)")?$/ do |text, area_type, title| 
   text = eval(text.inspect)
-  tab = only_tab(tab_type, title)
-  tab.visible_contents_as_string.should_not include(escape_text(text))
+  area = only_area(area_type, title)
+  area.visible_contents_as_string.should_not include(escape_text(text))
 end
 
 When /^I close the tab$/ do
@@ -48,8 +63,8 @@ Given /^I am looking at TestTab "([^\"]*)"$/ do |name|
   Redcar.win.tabs.find{|tab| tab.name == name}.focus
 end
 
-When /^I (right|left) click on the (\w+)$/ do |button, tab_type| # 
-  tab = only(Redcar.win.collect_tabs(Redcar.const_get(tab_type)))
+When /^I (right|left) click on the (\w+)Tab$/ do |button, tab_type| # 
+  tab = only(Redcar.win.collect_tabs(Redcar.const_get(tab_type + "Tab")))
   widget = tab.gtk_tab_widget
   case button
   when "right"
@@ -58,6 +73,23 @@ When /^I (right|left) click on the (\w+)$/ do |button, tab_type| #
     left_click_on(widget)
   end
 end
+
+When /^I (right|left) click on the (\w+)Pane$/ do |button, pane_type| # 
+  pane = only(Redcar.win.panes(Redcar.const_get(pane_type + "Pane")))
+  case pane_type
+  when "Project"
+    widget = pane.gtk_widget.children.first
+  else
+    widget = pane.widget
+  end
+  case button
+  when "right"
+    right_click_on(widget)
+  when "left"
+    left_click_on(widget)
+  end
+end
+
 
 Then /^I should be looking at the #{FeaturesHelper::ORDINAL_RE} EditTab$/ do |ordinal|
   num = parse_ordinal(ordinal) - 1

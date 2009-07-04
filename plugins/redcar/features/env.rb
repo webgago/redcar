@@ -58,6 +58,7 @@ After do
     Redcar.win.tabs.each(&:close)
     Redcar::UnifyAll.new.do
     Redcar::CommandHistory.clear
+    Redcar::ProjectPane.instance.clear
     make_event_key("Escape", :press).put
     make_event_key("Escape", :release).put
   end

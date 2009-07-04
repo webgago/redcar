@@ -5,7 +5,6 @@ Feature: The Project Pane
   Scenario: Open the project pane
     When I press "Ctrl+Shift+P"
     Then there should be one ProjectPane open
-    And the title of the ProjectPane should be "Project"
 
   Scenario: Shows the menu
     Given the ProjectPane is open
