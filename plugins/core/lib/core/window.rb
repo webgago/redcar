@@ -125,7 +125,14 @@ module Redcar
         if [Gtk::HPaned, Gtk::VPaned].include? other_side.class
           other_tabs = collect_tabs_from_dual(other_side)
         else
-          other_tabs = @widgets_panes[other_side].tabs
+          p other_side
+          if (pane = @widgets_panes[other_side]).is_a?(Redcar::NotebookPane)
+            p pane
+            other_tabs = pane.tabs
+            p other_tabs
+          else
+            other_tabs = []
+          end
           @widgets_panes.delete other_side
         end
         container_of_container = panes_container.parent
@@ -203,8 +210,10 @@ module Redcar
       if pane = @widgets_panes[gtk_widget]
         yield pane
       else
-        gtk_widget.children.each do |child|
-          traverse_panes_inner(child, &block)
+        if gtk_widget.respond_to?(:children)
+          gtk_widget.children.each do |child|
+            traverse_panes_inner(child, &block)
+          end
         end
       end
     end
@@ -260,6 +269,7 @@ module Redcar
       end
       dual.show
       dual.position = 250
+      Hook.trigger(:new_pane, new_pane)
       new_pane
     end
 

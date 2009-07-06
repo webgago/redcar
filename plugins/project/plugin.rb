@@ -3,8 +3,7 @@ module Redcar
   class ProjectPlugin < Redcar::Plugin
     on_load do
       Sensitive.register(:open_project, 
-                         [:open_window, :new_tab, :close_tab, 
-                          :after_focus_tab]) do
+                         [:open_window, :new_pane]) do
         Redcar.win and Redcar.win.panes(ProjectPane).any?
       end
       Kernel.load File.dirname(__FILE__) + "/panes/project_pane.rb"

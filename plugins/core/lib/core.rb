@@ -40,6 +40,7 @@ module Redcar
       Keymap.load
       Bundle.load
       Zerenity::Base.no_main_loop = true
+      Hook.register(:new_pane)
       plugin.transition(FreeBASE::LOADED)
     end
 

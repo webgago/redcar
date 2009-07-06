@@ -13,6 +13,7 @@ module Redcar
         tab.focus
         tab
       elsif @filename and File.file?(@filename)
+        p win
         new_tab = (@pane||win).new_tab(Redcar::EditTab)
         new_tab.load(@filename)
         new_tab.focus

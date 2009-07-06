@@ -11,14 +11,14 @@ Feature: Fuzzy file finder
     And I press "Return"
     Then there should be one EditTab open
     And the label of the EditTab should say "fuzzy_file_finder.feature"
-  # 
-  # Scenario: Jump to partially named file
-  #   When I press "Super+T"
-  #   And I type "fufifife"
-  #   And I press "Return"
-  #   Then there should be one EditTab open
-  #   And the label of the EditTab should say "fuzzy_file_finder.feature"
-  # 
+  
+  Scenario: Jump to partially named file
+    When I press "Super+T"
+    And I type "fufifife"
+    And I press "Return"
+    Then there should be one EditTab open
+    And the label of the EditTab should say "fuzzy_file_finder.feature"
+  
   # Scenario: First matching file should be shorter
   #   When I press "Super+T"
   #   And I type "newinprojcommand"
