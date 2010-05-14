@@ -14,7 +14,7 @@ module Redcar
         char_offset = 0
         word_offset = 0
         word = []
-
+        
         text.each_char do |char|
          # p [inside_word, char, word]
           if char =~ @word_chars
