@@ -3,7 +3,7 @@ module Redcar
   class ApplicationSWT
     class Menu
       def move(x, y)
-        @menu_bar.setLocation(x, y)
+        @menu_bar.setLocation(x, y)        
       end
     end
   end

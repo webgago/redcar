@@ -4,6 +4,7 @@ require 'spec/rake/spectask'
 require 'cucumber/rake/task'
 require "rake/gempackagetask"
 require "rake/rdoctask"
+        
 
 if RUBY_PLATFORM =~ /mswin|mingw/
   begin
